@@ -11,7 +11,7 @@ Client.on('ready', async (client) => {
 
 Client.on('messageCreate', async (message) => {
     if (message.author.bot) return;
-    if (!message.content.startsWith('!')) return;
+    if (!message.content.startsWith('/')) return;
 
     try {
         const command = message.content.toLocaleLowerCase().slice(1).split(' ')[0];
