@@ -1,13 +1,13 @@
 {
   "name": "codezilla",
   "version": "1.0.0",
-  "description": "",
+  "description": "Discord bot developed by Ashrah",
   "main": "bot.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
-  "author": "",
+  "author": "Ashrah",
   "license": "ISC",
   "dependencies": {
     "discord-player": "^6.6.8",
