@@ -4,23 +4,23 @@ const ytdl = require('ytdl-core');
 const YouTube = require('youtube-sr').default;
 
 module.exports = async (message, client) => {
-    // Check if the message author is in a voice channel
+    // Verifica si el autor se ecnuentra en un canal de voz
     const memberVoiceChannel = message.member.voice.channel;
     if (!memberVoiceChannel) {
         return message.reply('Debes estar en un canal de voz para que el bot pueda reproducir música.');
     }
 
-    // Extract the input from the message
+    // Revisa el input
     const args = message.content.split(' ');
     const input = args[1];
-    const artist = args[2]; // Assuming the artist's name is the second argument
+    const artist = args[2];
     if (!input || !artist) {
         return message.reply('Por favor, proporciona el nombre de una canción y el nombre del artista para reproducir.');
     }
 
     let searchResults;
     try {
-        // Search for the song by the artist and song title
+        // Busca la canción por artista y nombre de la canción
         searchResults = await YouTube.search(`${artist} ${input}`, { limit: 5 });
         if (searchResults.length === 0) {
             return message.reply('No se encontró ninguna canción con ese nombre y artista.');
@@ -30,7 +30,7 @@ module.exports = async (message, client) => {
         return message.reply('Ocurrió un error al buscar la canción en YouTube.');
     }
 
-    // Send a message with the search results
+    // Envía el mensaje con los reusultados de la busqueda
     const embed = {
         title: 'Resultados de búsqueda',
         description: searchResults.map((result, index) => `${index + 1}. ${result.title}`).join('\n'),
@@ -38,7 +38,7 @@ module.exports = async (message, client) => {
     };
     message.channel.send({ embeds: [embed] });
 
-    // Wait for the user's response to select a song
+    // Espera la respuesta del ususario
     const filter = m => m.author.id === message.author.id;
     const collected = await message.channel.awaitMessages({ filter, max: 1, time: 30000 }); // Wait for 30 seconds
 
@@ -54,18 +54,18 @@ module.exports = async (message, client) => {
 
     const url = searchResults[selectedIndex].url;
 
-    // Join the voice channel
+    // Ingresa al canal de voz
     const connection = joinVoiceChannel({
         channelId: memberVoiceChannel.id,
         guildId: memberVoiceChannel.guild.id,
         adapterCreator: memberVoiceChannel.guild.voiceAdapterCreator,
     });
 
-    // Create an audio player
+    // Crea un audio player
     const player = createAudioPlayer();
     connection.subscribe(player);
 
-    // Play the YouTube video
+    // Reproduce la petición
     const stream = ytdl(url, { filter: 'audioonly' });
     const resource = createAudioResource(stream);
     player.play(resource);
