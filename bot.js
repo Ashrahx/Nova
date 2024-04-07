@@ -15,9 +15,9 @@ Client.on('messageCreate', async (message) => {
 
     try {
         const command = message.content.toLocaleLowerCase().slice(1).split(' ')[0];
-        console.log(command)
+        console.log(command);
         const executeCommand = require(`./commands/${command}.js`);
-        executeCommand(message);
+        executeCommand(message, Client);
     } catch (error) {
         console.error(`${message.content} no es un comando válido`);
     }

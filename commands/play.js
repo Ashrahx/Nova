@@ -1,40 +1,36 @@
 const { Player } = require('discord-player');
 
-module.exports = async (message) => {
-    const args = message.content.split(' ').slice(1);
 
-    const queue = Player.getQueue(message.guild.id);
+module.exports = async (message, client) => {
+    const player = new Player(client);
+    const args = message.content.slice(1).trim().split(/ +/);
+    const link = args[1];
 
-    const voiceChannel = message.member.voice.channel;
-    if (!voiceChannel) return message.channel.send('¡Debes estar en un canal de voz para reproducir música!');
-    
-    const permissions = voiceChannel.permissionsFor(message.client.user);
-    if (!permissions.has('CONNECT') || !permissions.has('SPEAK')) {
-        return message.channel.send('¡No tengo permisos para unirme y hablar en ese canal de voz!');
+    if (!link) {
+        return message.reply('Debes proporcionar un enlace de YouTube.');
     }
 
-    if (!args.length) return message.channel.send('¡Debes proporcionar el nombre de una canción o un enlace de YouTube!');
+    // Verificar si el autor del mensaje está en un canal de voz
+    const memberVoiceChannel = message.member.voice.channel;
+    if (!memberVoiceChannel) {
+        return message.reply('Debes estar en un canal de voz para reproducir música.');
+    }
 
-    const player = Player.play(message, args.join(' '), {
-        quality: 'high',
-    });
+    try {
+        // Unirse al canal de voz del autor del mensaje
+        const connection = await memberVoiceChannel.join();
 
-    player.on('error', (queue, error) => {
-        console.error(error);
-        queue.textChannel.send(`Ocurrió un error al reproducir la canción: ${error}`);
-    });
+        // Verificar permisos para el bot en el canal de voz
+        const permissions = memberVoiceChannel.permissionsFor(client.user);
+        if (!permissions.has('SPEAK')) {
+            throw new Error('No tengo permisos para hablar en tu canal de voz.');
+        }
 
-    player.on('connectionError', (queue, error) => {
-        console.error(error);
-        queue.textChannel.send(`Ocurrió un error al conectar al canal de voz: ${error}`);
-    });
-
-    player.on('trackStart', (queue, track) => {
-        message.channel.send(`🎵 Ahora reproduciendo: **${track.title}**`);
-    });
-
-    player.on('queueEnd', (queue) => {
-        message.channel.send('🎵 La lista de reproducción ha terminado.');
-        Player.remove(message.guild.id);
-    });
+        // Reproducir música en el canal de voz del autor del mensaje
+        await player.play(message, link);
+        message.reply(`Reproduciendo ${link}`);
+    } catch (error) {
+        console.error('Error al reproducir música:', error.message);
+        message.reply('Ocurrió un error al reproducir la música.');
+    }
 };
