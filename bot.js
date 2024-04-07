@@ -2,10 +2,7 @@ const Discord = require('discord.js');
 require('dotenv').config();
 
 const Client = new Discord.Client({
-    intents: [
-        3276799,
-        Discord.Intents.FLAGS.GUILDS_VOICE_STATES
-    ]
+    intents: 3276799
 });
 
 Client.on('ready', async (client) => {
@@ -37,7 +34,7 @@ Client.on('guildMemberAdd', async (member) => {
 
     const button = new Discord.ActionRowBuilder().addComponents(
         new Discord.ButtonBuilder({
-            style: 3,
+            style: 1,
             label: 'Saludar',
             emoji: '👋',
             custom_id: 'saludo'
