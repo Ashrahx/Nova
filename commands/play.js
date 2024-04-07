@@ -1,6 +1,5 @@
 const { Player } = require('discord-player');
 
-
 module.exports = async (message, client) => {
     const player = new Player(client);
     const args = message.content.slice(1).trim().split(/ +/);

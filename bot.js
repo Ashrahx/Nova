@@ -2,7 +2,10 @@ const Discord = require('discord.js');
 require('dotenv').config();
 
 const Client = new Discord.Client({
-    intents: 3276799
+    intents: [
+        3276799,
+        Discord.Intents.FLAGS.GUILDS_VOICE_STATES
+    ]
 });
 
 Client.on('ready', async (client) => {
