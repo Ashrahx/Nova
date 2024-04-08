@@ -2,17 +2,13 @@ const { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerSta
 const ytdl = require('ytdl-core');
 const ytSearch = require('yt-search');
 
+// Function to check if the message contains a link
 function containsLink(message) {
     const urlRegex = /(https?:\/\/[^\s]+)/g;
     return urlRegex.test(message);
 }
 
-function extractSeconds(durationText) {
-    const secondsRegex = /(\d+) seconds/;
-    const match = durationText.match(secondsRegex);
-    return match ? Number(match[1]) : undefined;
-}
-
+// Function to get song information from a link
 async function getSongInfoFromLink(url) {
     try {
         const info = await ytdl.getInfo(url);
@@ -29,16 +25,35 @@ async function getSongInfoFromLink(url) {
     }
 }
 
-
+// Modified searchSong function to return multiple results
 async function searchSong(query) {
     const searchResults = await ytSearch(query);
-    const video = searchResults.videos[0];
-    return {
+    return searchResults.videos.slice(0, 6).map(video => ({
         title: video.title,
         duration: video.duration,
         url: video.url,
         thumbnail: video.thumbnail,
+    }));
+}
+
+// New function to send song options and handle selection
+async function sendSongOptions(message, options) {
+    const embed = {
+        title: 'Selecciona una canción',
+        description: options.map((option, index) => `${index + 1}. ${option.title}`).join('\n'),
+        color: 0x8a5bff,
     };
+    message.channel.send({ embeds: [embed] });
+
+    const filter = m => !isNaN(m.content) && parseInt(m.content) <= options.length && parseInt(m.content) > 0;
+    const collected = await message.channel.awaitMessages({ filter, max: 1, time: 30000 });
+
+    if (collected.size === 0) {
+        return null;
+    }
+
+    const selection = parseInt(collected.first().content) - 1;
+    return options[selection];
 }
 
 module.exports = async (message, client) => {
@@ -63,12 +78,14 @@ module.exports = async (message, client) => {
         const input = args[1];
         const artist = args[2];
         
-        songInfo = await searchSong(`${artist} ${input}`);
-        const seconds = extractSeconds(songInfo.duration);
-        if (seconds !== undefined) {
-            songInfo.duration = seconds;
-        } else {
-            return message.reply('No se pudo extraer la duración de la canción.');
+        const options = await searchSong(`${artist} ${input}`);
+        if (options.length === 0) {
+            return message.reply('No se encontraron canciones.');
+        }
+
+        songInfo = await sendSongOptions(message, options);
+        if (!songInfo) {
+            return message.reply('No se seleccionó ninguna canción.');
         }
     }
 
@@ -87,14 +104,17 @@ module.exports = async (message, client) => {
         player.play(resource);
 
         function formatDuration(seconds) {
-            
+            if (typeof seconds !== 'number') {
+                return undefined;
+            }
+        
             const minutes = Math.floor(seconds / 60);
             const remainingSeconds = seconds % 60;
             return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
         }
 
         const embed = {
-            title: `Ahora suena`,
+            title: `🎧 Ahora suena`,
             description: `${songInfo.title}\n**Duración**: ${formatDuration(songInfo.duration)}`,
             color: 0x8a5bff,
             thumbnail: {url: songInfo.thumbnail},

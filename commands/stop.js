@@ -16,4 +16,5 @@ module.exports = async (message, client) => {
         thumbnail: {url: client.user.avatarURL()},
     };
     message.channel.send({ embeds: [embed] });
+    message.delete();
 };
