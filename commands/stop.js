@@ -9,5 +9,11 @@ module.exports = async (message, client) => {
 
     // Detiene la música
     connection.destroy();
-    message.reply('He detenido la reproducción de música.');
+    const embed = {
+        title: 'Desconectado',
+        description: 'El bot se ha desconectado del canal de voz.',
+        color: 0x8a5bff,
+        thumbnail: {url: client.user.avatarURL()},
+    };
+    message.channel.send({ embeds: [embed] });
 };
