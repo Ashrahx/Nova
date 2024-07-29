@@ -1,7 +1,4 @@
-# Nova
-
 ![Nova](https://github.com/user-attachments/assets/dc6a7897-7a13-4358-ae12-8943081b965f)
-2f-991d-4107-af7d-f3c5acb57d12)
 
 This is a Discord bot developed in Node.js that performs various functions such as moderation, entertainment, information, and more. It uses the Discord.js library to interact with the Discord API.
 
